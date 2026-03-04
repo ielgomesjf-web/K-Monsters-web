@@ -1,0 +1,183 @@
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation}
+:root{--bg:#0a0a12;--bg2:#12121f;--text:#e0e0e0;--text2:#888;--gold:#f0c040;--green:#40d080;--red:#e04040;--blue:#4090e0;--purple:#a060e0;--cyan:#40d0d0;--lava:#e07030;--far:#60b0e0;--exotic:#d080e0;--boss:#ff4060;--card:#181828;--border:#2a2a3f;--accent:#f0c040}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh}
+
+/* Landing Page */
+.landing{overflow-x:hidden}
+.stars{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(2px 2px at 40px 70px,#fff,transparent),radial-gradient(1px 1px at 90px 40px,#fff,transparent),radial-gradient(1px 1px at 130px 80px,#fff,transparent),radial-gradient(2px 2px at 160px 30px,#fff,transparent);background-size:200px 200px;animation:stars 60s linear infinite;z-index:-1;opacity:.4}
+@keyframes stars{to{transform:translateY(-200px)}}
+
+header{text-align:center;padding:60px 20px 20px}
+.title-glow{font-size:4rem;color:var(--gold);text-shadow:0 0 20px rgba(240,192,64,.6),0 0 60px rgba(240,192,64,.3);letter-spacing:8px}
+.subtitle{font-size:1.2rem;color:var(--text2);margin-top:10px;letter-spacing:4px}
+
+.landing-content{max-width:900px;margin:0 auto;padding:20px}
+
+.hero{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:30px;margin:30px 0}
+.hero-text p{margin:10px 0;line-height:1.7;font-size:.95rem}
+.hero-text strong{color:var(--gold)}
+
+.features{margin:40px 0}
+.features h2,.games-section h2,.kreatures-section h2,.credits-section h2{text-align:center;color:var(--gold);font-size:1.5rem;margin-bottom:20px;letter-spacing:3px}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;transition:transform .2s,border-color .2s}
+.feature-card:hover{transform:translateY(-4px);border-color:var(--gold)}
+.feature-icon{font-size:2rem;margin-bottom:10px}
+.feature-card h3{color:var(--gold);margin-bottom:8px;font-size:1rem}
+.feature-card p{color:var(--text2);font-size:.8rem;line-height:1.5}
+
+.games-list{display:flex;flex-direction:column;gap:16px}
+.game-card{display:flex;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;transition:border-color .2s}
+.game-card:hover{border-color:var(--gold)}
+.game-number{font-size:2.5rem;color:var(--gold);font-weight:bold;min-width:50px;text-align:center;opacity:.7}
+.game-info h3{color:var(--gold);font-size:1.1rem}
+.game-tagline{color:var(--text2);font-size:.85rem;margin:4px 0 8px}
+.game-info>p{font-size:.85rem;line-height:1.6}
+.game-info strong{color:var(--cyan)}
+.game-details{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.game-details span{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:.7rem;color:var(--text2)}
+
+.kreatures-showcase{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.kreature-tag{padding:6px 12px;border-radius:6px;font-size:.8rem;border:1px solid}
+.kreature-tag span{color:var(--text2);font-size:.7rem}
+.kreature-tag.gold{border-color:var(--gold);color:var(--gold)}
+.kreature-tag.normal{border-color:#888;color:#aaa}
+.kreature-tag.lava{border-color:var(--lava);color:var(--lava)}
+.kreature-tag.ultra{border-color:var(--purple);color:var(--purple)}
+.kreature-tag.water{border-color:var(--blue);color:var(--blue)}
+.kreature-tag.far{border-color:var(--far);color:var(--far)}
+.kreature-tag.exotic{border-color:var(--exotic);color:var(--exotic)}
+.kreature-tag.boss{border-color:var(--boss);color:var(--boss)}
+
+.kreatures-section,.credits-section{margin:40px 0;text-align:center}
+.credits-section p{margin:6px 0;font-size:.85rem;color:var(--text2)}
+.credits-section strong{color:var(--text)}
+
+.play-button{display:block;width:fit-content;margin:40px auto 60px;padding:18px 60px;background:linear-gradient(135deg,var(--gold),#e0a020);color:var(--bg);font-size:1.3rem;font-weight:bold;text-decoration:none;border-radius:10px;letter-spacing:4px;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(240,192,64,.3)}
+.play-button:hover{transform:scale(1.05);box-shadow:0 6px 30px rgba(240,192,64,.5)}
+
+/* Preços */
+.price-tag{float:right;background:var(--green);color:var(--bg);padding:2px 10px;border-radius:4px;font-size:.8rem;font-weight:bold;letter-spacing:.5px}
+.pack-price{background:var(--gold)}
+.pack-card{border:2px solid var(--gold)!important;position:relative;background:linear-gradient(135deg,var(--card),#1a1a30)!important}
+.pack-card::before{content:'MELHOR VALOR';position:absolute;top:-12px;right:16px;background:var(--gold);color:var(--bg);padding:3px 12px;border-radius:4px;font-size:.65rem;font-weight:bold;letter-spacing:1px}
+.pack-card .game-number{color:var(--gold);font-size:2.5rem}
+.pack-card s{color:var(--red);opacity:.7}
+.pack-btn{border-color:var(--gold)!important;background:linear-gradient(135deg,var(--card),#1a1a30)!important;position:relative}
+.pack-btn::after{content:'★';position:absolute;top:6px;right:10px;color:var(--gold);font-size:.9rem}
+
+footer{text-align:center;padding:20px;color:var(--text2);font-size:.75rem;border-top:1px solid var(--border)}
+
+/* Game Page */
+.game-page{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+
+.game-header{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.game-header h1{font-size:1rem;color:var(--gold);letter-spacing:2px}
+.game-header .back-link{color:var(--text2);text-decoration:none;font-size:.8rem}
+.game-header .back-link:hover{color:var(--gold)}
+
+.game-container{display:flex;flex:1;overflow:hidden}
+
+/* Menu lateral */
+.game-menu{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:12px;overflow-y:auto;flex-shrink:0}
+.menu-title{color:var(--gold);font-size:.85rem;margin-bottom:10px;letter-spacing:1px}
+.menu-btn{display:block;width:100%;padding:10px 12px;margin:4px 0;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.8rem;cursor:pointer;text-align:left;transition:border-color .2s,background .2s}
+.menu-btn:hover{border-color:var(--gold);background:#1f1f35}
+.menu-btn.active{border-color:var(--gold);background:#1f1f35;color:var(--gold)}
+.menu-btn .menu-sub{display:block;font-size:.65rem;color:var(--text2);margin-top:2px}
+.menu-btn.locked{opacity:.45;cursor:not-allowed;position:relative}
+.menu-btn.locked::after{content:'🔒';position:absolute;top:8px;right:10px;font-size:.85rem}
+
+/* Area principal do jogo */
+.game-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+#game-output{flex:1;overflow-y:auto;padding:16px;font-size:.9rem;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
+#game-output .line{margin:2px 0;animation:fadeIn .15s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#game-output .separator{color:var(--text2);user-select:none}
+#game-output .bold{color:var(--gold);font-weight:bold}
+#game-output .danger{color:var(--red)}
+#game-output .info{color:var(--cyan)}
+#game-output .success{color:var(--green)}
+#game-output .boss-text{color:var(--boss);font-weight:bold}
+#game-output .phase-text{color:var(--purple);font-weight:bold}
+
+#game-input-area{padding:12px 16px;background:var(--bg2);border-top:1px solid var(--border);min-height:50px}
+#game-input-area.hidden{display:none}
+
+.input-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.input-btn{padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem;cursor:pointer;transition:border-color .15s,background .15s;-webkit-user-select:none;user-select:none}
+.input-btn:hover{border-color:var(--gold);background:#1f1f35}
+.input-btn:active{border-color:var(--gold);background:#1f1f35}
+.input-btn.primary{border-color:var(--gold);color:var(--gold)}
+
+.input-text-wrap{display:flex;gap:8px}
+.input-text-wrap input{flex:1;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem;outline:none}
+.input-text-wrap input:focus{border-color:var(--gold)}
+.input-text-wrap button{padding:8px 16px;background:var(--gold);border:none;border-radius:6px;color:var(--bg);font-family:inherit;font-size:.85rem;font-weight:bold;cursor:pointer}
+
+/* Mapa */
+.map-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg);border:2px solid var(--gold);border-radius:10px;padding:16px;z-index:10;max-width:90vw;max-height:80vh;overflow:auto}
+.map-overlay.hidden{display:none}
+
+.map-grid{display:inline-grid;gap:2px;margin:8px 0}
+.map-cell{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:bold;border-radius:4px;border:1px solid var(--border);background:var(--card)}
+.map-cell.player{background:var(--gold);color:var(--bg);font-size:.8rem;border-color:var(--gold)}
+.map-cell.V,.map-cell.B{background:#1a2a1a;color:#6a6}
+.map-cell.C{background:#2a1a2a;color:#a6a}
+.map-cell.F,.map-cell.O{background:#0a2a0a;color:#4a4}
+.map-cell.P{background:#0a1a2a;color:#48a}
+.map-cell.L{background:#2a1a0a;color:#a64}
+.map-cell.K,.map-cell.S,.map-cell.A{background:#2a0a0a;color:#a44}
+.map-cell.G{background:#1a2a0a;color:#8a4}
+.map-cell.T{background:#1a1a2a;color:#88a}
+.map-cell.E{background:#2a0a2a;color:#a4a}
+.map-cell.R{background:#1a1a1a;color:#888}
+.map-cell.empty{background:transparent;border-color:transparent}
+
+.map-legend{font-size:.7rem;color:var(--text2);margin-bottom:8px}
+.map-info{font-size:.8rem;margin-top:8px}
+.map-info span{margin-right:12px}
+.map-controls{margin-top:8px;font-size:.75rem;color:var(--text2)}
+
+/* D-pad layout */
+.dpad-layout{display:flex;flex-direction:column;align-items:center;gap:8px}
+.dpad-grid{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
+.dpad-btn{width:52px;height:52px;padding:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.dpad-extras{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.dpad-extras .dpad-btn{width:auto;height:auto;padding:10px 16px;font-size:.85rem}
+
+/* HUD do combate */
+.combat-hud{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin:8px 0;font-size:.85rem}
+.combat-hud .team-row{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0}
+.combat-hud .kreature-stat{padding:4px 8px;border-radius:4px;border:1px solid var(--border);font-size:.8rem}
+.combat-hud .kreature-stat.active{border-color:var(--gold);color:var(--gold)}
+.combat-hud .kreature-stat.dead{opacity:.4;text-decoration:line-through}
+.combat-hud .boss-hp{color:var(--boss);font-weight:bold}
+
+/* Responsive */
+@media(max-width:768px){
+.title-glow{font-size:2.5rem}
+.game-menu{width:160px;font-size:.75rem}
+.game-card{flex-direction:column}
+.game-number{min-width:auto}
+.map-cell{width:32px;height:32px;font-size:.5rem}
+}
+.mobile-menu-btn{display:none;background:none;border:1px solid var(--border);color:var(--gold);font-size:1.2rem;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:inherit}
+.mobile-menu-btn:hover{border-color:var(--gold)}
+@media(max-width:500px){
+.mobile-menu-btn{display:block}
+.game-menu{display:none;position:absolute;top:40px;left:0;width:100%;z-index:20;background:var(--bg2);border-bottom:2px solid var(--gold);padding:12px}
+.game-menu.open{display:block}
+.game-container{flex-direction:column}
+.input-buttons{gap:6px}
+.input-btn{padding:12px 14px;font-size:.9rem;min-height:44px}
+.menu-btn{padding:12px;min-height:44px}
+#game-input-area{padding:10px 12px;position:sticky;bottom:0}
+.map-overlay{padding:10px;max-width:95vw;max-height:70vh}
+.map-cell{width:36px;height:36px;font-size:.55rem}
+.map-grid{gap:1px}
+.input-text-wrap input{padding:10px 12px;font-size:1rem;min-height:44px}
+.input-text-wrap button{padding:10px 16px;min-height:44px}
+}

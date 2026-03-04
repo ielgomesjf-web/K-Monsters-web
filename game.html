@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>K-Monsters - Jogo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="game-page">
+
+<div class="game-header">
+<h1>K-MONSTERS</h1>
+<button class="mobile-menu-btn" onclick="document.getElementById('game-menu').classList.toggle('open')">☰</button>
+<a href="index.html" class="back-link">← Voltar ao site</a>
+</div>
+
+<div class="game-container">
+<nav class="game-menu" id="game-menu">
+<div class="menu-title">JOGOS</div>
+<button class="menu-btn" onclick="KM.startGame('base')">
+K-Monsters
+<span class="menu-sub">O início de tudo</span>
+</button>
+<button class="menu-btn" onclick="KM.startGame('dlc1')">
+A Far Planet
+<span class="menu-sub">DLC — Planeta distante</span>
+</button>
+<button class="menu-btn" onclick="KM.startGame('dlc2')">
+Ecos do Vazio
+<span class="menu-sub">DLC — Fragmentos</span>
+</button>
+<button class="menu-btn" onclick="KM.startGame('dlc3')">
+Companhia Esquecida
+<span class="menu-sub">DLC — Origem do K-Omega</span>
+</button>
+<button class="menu-btn" onclick="KM.startGame('km2')">
+K-Monsters 2
+<span class="menu-sub">De Volta ao Lar</span>
+</button>
+<button class="menu-btn pack-btn" onclick="KM.startGame('pack')">
+Pacote Completo
+<span class="menu-sub">Todos os jogos — R$ 55 (economia de R$ 5)</span>
+</button>
+<hr style="border-color:var(--border);margin:12px 0">
+<div class="menu-title">OPÇÕES</div>
+<button class="menu-btn key-btn" onclick="KM.activateKey()">Ativar Chave
+<span class="menu-sub">Inserir chave de 25 dígitos</span>
+</button>
+<button class="menu-btn" onclick="KM.resetSave()">Resetar Save</button>
+</nav>
+
+<div class="game-main" style="position:relative">
+<div id="game-output"></div>
+<div id="game-input-area" class="hidden"></div>
+</div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/game.js"></script>
+<script src="js/base/game.js"></script>
+<script src="js/dlc1/game.js"></script>
+<script src="js/dlc2/game.js"></script>
+<script src="js/dlc3/game.js"></script>
+<script src="js/km2/game.js"></script>
+</body>
+</html>
