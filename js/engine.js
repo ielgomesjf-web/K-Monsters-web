@@ -76,33 +76,8 @@ const KMEngine = {
       const wrap = document.createElement('div');
       wrap.className = 'input-buttons';
 
-      const cleanup = () => {
-        this._input.innerHTML = '';
-        this._input.classList.add('hidden');
-        if (signal) signal.removeEventListener('abort', onAbort);
-      };
-
-      const onAbort = () => {
-        cleanup();
-        reject(new DOMException('Game stopped', 'AbortError'));
-      };
-
-      if (signal) signal.addEventListener('abort', onAbort, { once: true });
-
-      const btns = [];
-      options.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'input-btn' + (opt.primary ? ' primary' : '');
-        btn.textContent = (options.length > 1 ? `[${i + 1}] ` : '') + opt.label;
-        btn.addEventListener('click', () => {
-          cleanup();
-          resolve(opt.value);
-        });
-        btns.push(btn);
-        wrap.appendChild(btn);
-      });
-
       // Keyboard support: 1-9 to pick option, Enter for single/primary
+      const btns = [];
       const onKey = (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         const num = parseInt(e.key);
@@ -119,8 +94,32 @@ const KMEngine = {
         }
       };
       document.addEventListener('keydown', onKey);
-      const origCleanup = cleanup;
-      cleanup = () => { document.removeEventListener('keydown', onKey); origCleanup(); };
+
+      const cleanup = () => {
+        document.removeEventListener('keydown', onKey);
+        this._input.innerHTML = '';
+        this._input.classList.add('hidden');
+        if (signal) signal.removeEventListener('abort', onAbort);
+      };
+
+      const onAbort = () => {
+        cleanup();
+        reject(new DOMException('Game stopped', 'AbortError'));
+      };
+
+      if (signal) signal.addEventListener('abort', onAbort, { once: true });
+
+      options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'input-btn' + (opt.primary ? ' primary' : '');
+        btn.textContent = (options.length > 1 ? `[${i + 1}] ` : '') + opt.label;
+        btn.addEventListener('click', () => {
+          cleanup();
+          resolve(opt.value);
+        });
+        btns.push(btn);
+        wrap.appendChild(btn);
+      });
 
       this._input.appendChild(wrap);
       this._output.scrollTop = this._output.scrollHeight;
@@ -269,7 +268,28 @@ const KMEngine = {
       const wrap = document.createElement('div');
       wrap.className = 'dpad-layout';
 
+      // Keyboard support: WASD/Arrows for directions, extra keys by value
+      const keyMap = {
+        'w': 'w', 'arrowup': 'w',
+        'a': 'a', 'arrowleft': 'a',
+        's': 's', 'arrowdown': 's',
+        'd': 'd', 'arrowright': 'd',
+      };
+      if (extraOpts) extraOpts.forEach(opt => { keyMap[opt.value.toLowerCase()] = opt.value; });
+
+      const allBtns = {};
+      const onKey = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const mapped = keyMap[e.key.toLowerCase()];
+        if (mapped && allBtns[mapped]) {
+          e.preventDefault();
+          allBtns[mapped].click();
+        }
+      };
+      document.addEventListener('keydown', onKey);
+
       const cleanup = () => {
+        document.removeEventListener('keydown', onKey);
         this._input.innerHTML = '';
         this._input.classList.add('hidden');
         if (signal) signal.removeEventListener('abort', onAbort);
@@ -282,7 +302,6 @@ const KMEngine = {
 
       if (signal) signal.addEventListener('abort', onAbort, { once: true });
 
-      const allBtns = {};
       const makeBtn = (opt) => {
         const btn = document.createElement('button');
         btn.className = 'input-btn dpad-btn';
@@ -315,28 +334,6 @@ const KMEngine = {
         extraOpts.forEach(opt => extraWrap.appendChild(makeBtn(opt)));
         wrap.appendChild(extraWrap);
       }
-
-      // Keyboard support: WASD/Arrows for directions, extra keys by value
-      const keyMap = {
-        'w': 'w', 'arrowup': 'w',
-        'a': 'a', 'arrowleft': 'a',
-        's': 's', 'arrowdown': 's',
-        'd': 'd', 'arrowright': 'd',
-      };
-      // Map extra option values as hotkeys (e.g. 't' for Trocar, 'q' for Sair)
-      if (extraOpts) extraOpts.forEach(opt => { keyMap[opt.value.toLowerCase()] = opt.value; });
-
-      const onKey = (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        const mapped = keyMap[e.key.toLowerCase()];
-        if (mapped && allBtns[mapped]) {
-          e.preventDefault();
-          allBtns[mapped].click();
-        }
-      };
-      document.addEventListener('keydown', onKey);
-      const origCleanup = cleanup;
-      cleanup = () => { document.removeEventListener('keydown', onKey); origCleanup(); };
 
       this._input.appendChild(wrap);
       this._output.scrollTop = this._output.scrollHeight;
