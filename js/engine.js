@@ -89,16 +89,38 @@ const KMEngine = {
 
       if (signal) signal.addEventListener('abort', onAbort, { once: true });
 
-      options.forEach(opt => {
+      const btns = [];
+      options.forEach((opt, i) => {
         const btn = document.createElement('button');
         btn.className = 'input-btn' + (opt.primary ? ' primary' : '');
-        btn.textContent = opt.label;
+        btn.textContent = (options.length > 1 ? `[${i + 1}] ` : '') + opt.label;
         btn.addEventListener('click', () => {
           cleanup();
           resolve(opt.value);
         });
+        btns.push(btn);
         wrap.appendChild(btn);
       });
+
+      // Keyboard support: 1-9 to pick option, Enter for single/primary
+      const onKey = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= btns.length) {
+          e.preventDefault();
+          btns[num - 1].click();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (btns.length === 1) { btns[0].click(); }
+          else {
+            const primary = btns.find(b => b.classList.contains('primary'));
+            if (primary) primary.click();
+          }
+        }
+      };
+      document.addEventListener('keydown', onKey);
+      const origCleanup = cleanup;
+      cleanup = () => { document.removeEventListener('keydown', onKey); origCleanup(); };
 
       this._input.appendChild(wrap);
       this._output.scrollTop = this._output.scrollHeight;
@@ -260,11 +282,13 @@ const KMEngine = {
 
       if (signal) signal.addEventListener('abort', onAbort, { once: true });
 
+      const allBtns = {};
       const makeBtn = (opt) => {
         const btn = document.createElement('button');
         btn.className = 'input-btn dpad-btn';
         btn.textContent = opt.label;
         btn.addEventListener('click', () => { cleanup(); resolve(opt.value); });
+        allBtns[opt.value] = btn;
         return btn;
       };
 
@@ -291,6 +315,28 @@ const KMEngine = {
         extraOpts.forEach(opt => extraWrap.appendChild(makeBtn(opt)));
         wrap.appendChild(extraWrap);
       }
+
+      // Keyboard support: WASD/Arrows for directions, extra keys by value
+      const keyMap = {
+        'w': 'w', 'arrowup': 'w',
+        'a': 'a', 'arrowleft': 'a',
+        's': 's', 'arrowdown': 's',
+        'd': 'd', 'arrowright': 'd',
+      };
+      // Map extra option values as hotkeys (e.g. 't' for Trocar, 'q' for Sair)
+      if (extraOpts) extraOpts.forEach(opt => { keyMap[opt.value.toLowerCase()] = opt.value; });
+
+      const onKey = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const mapped = keyMap[e.key.toLowerCase()];
+        if (mapped && allBtns[mapped]) {
+          e.preventDefault();
+          allBtns[mapped].click();
+        }
+      };
+      document.addEventListener('keydown', onKey);
+      const origCleanup = cleanup;
+      cleanup = () => { document.removeEventListener('keydown', onKey); origCleanup(); };
 
       this._input.appendChild(wrap);
       this._output.scrollTop = this._output.scrollHeight;
@@ -374,7 +420,7 @@ const KMEngine = {
 
   // Wait for any keypress (shows "continue" button)
   anyKey(label) {
-    return this.choice([{ label: label || 'Continuar...', value: 'ok', primary: true }]);
+    return this.choice([{ label: label || 'Continuar... [Enter]', value: 'ok', primary: true }]);
   },
 
   // Enter key (shows "ENTER" button)
