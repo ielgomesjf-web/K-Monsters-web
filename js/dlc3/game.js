@@ -4,6 +4,7 @@
 KMGames.dlc3 = async function() {
   const E = KMEngine;
   const S = KMSave;
+  KMMusic.play('exploration');
 
   // ============================================================
   // INTRO — Nascimento do K-Omega
@@ -275,6 +276,7 @@ KMGames.dlc3 = async function() {
     // Encontro (40% chance)
     if (equipes[area] && Math.random() < 0.40) {
       const equipe = equipes[area][Math.floor(Math.random() * equipes[area].length)];
+      equipe.forEach(k => S.addKdexEntry(k));
       E.clear();
       E.print(`${equipe.join('  e  ')} aparecem!`, 'bold');
       await E.sleep(1000);
@@ -310,6 +312,7 @@ KMGames.dlc3 = async function() {
 
         S.setDlc3Komega(komega);
       }
+      KMMusic.play('exploration');
       await E.sleep(1000);
       await E.anyKey();
     }
@@ -367,6 +370,9 @@ KMGames.dlc3 = async function() {
   E.clear();
   E.print('Primeiro K-Master.', 'bold');
   await E.sleep(1000);
+  S.addKdexEntry('K-Omega');
+  S.addKdexEntry('K-Mega');
+  S.addKdexEntry('K-Rat');
   let result = await KMCombat.combateKOmega(komega, ['K-Mega', 'K-Rat']);
   komega = result.komega;
   if (!result.venceu) {

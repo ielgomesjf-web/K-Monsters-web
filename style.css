@@ -224,6 +224,50 @@ footer{text-align:center;padding:20px;color:var(--text2);font-size:.75rem;border
 .hall-name{color:var(--green);font-weight:bold;font-size:.9rem}
 .hall-detail{color:var(--text2);font-size:.75rem;margin-top:2px}
 
+/* Type effectiveness */
+#game-output .super-effective{color:var(--gold);font-weight:bold;font-size:.85rem}
+#game-output .not-effective{color:var(--text2);font-style:italic;font-size:.85rem}
+
+/* Type badges */
+.type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:bold;letter-spacing:.5px;border:1px solid}
+.type-Fogo{color:var(--lava);border-color:var(--lava);background:rgba(224,112,48,.1)}
+.type-Agua{color:var(--blue);border-color:var(--blue);background:rgba(64,144,224,.1)}
+.type-Planta{color:var(--green);border-color:var(--green);background:rgba(64,208,128,.1)}
+.type-Sombra{color:var(--purple);border-color:var(--purple);background:rgba(160,96,224,.1)}
+.type-Luz{color:var(--gold);border-color:var(--gold);background:rgba(240,192,64,.1)}
+.type-Normal{color:var(--text2);border-color:var(--text2);background:rgba(136,136,136,.1)}
+
+/* K-Dex */
+.kdex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:16px 0}
+.kdex-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:default;transition:border-color .2s}
+.kdex-card:hover{border-color:var(--gold)}
+.kdex-card.locked{opacity:.4;filter:grayscale(1)}
+.kdex-card.locked .kdex-name{color:var(--text2)}
+.kdex-name{color:var(--gold);font-weight:bold;font-size:.9rem;margin-bottom:4px}
+.kdex-stats{font-size:.75rem;color:var(--text2);margin:2px 0}
+.kdex-skill{font-size:.75rem;color:var(--cyan);margin-top:4px}
+.kdex-counter{text-align:center;color:var(--gold);font-size:1rem;font-weight:bold;margin-bottom:12px;letter-spacing:1px}
+
+/* Conquistas */
+.conquista-toast{position:fixed;top:16px;right:16px;background:var(--card);border:2px solid var(--gold);border-radius:10px;padding:14px 20px;z-index:200;display:flex;align-items:center;gap:12px;animation:slideInRight .4s ease-out;box-shadow:0 4px 20px rgba(240,192,64,.3);max-width:320px}
+@keyframes slideInRight{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+.conquista-toast .conquista-icon{font-size:1.6rem;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.conquista-toast .conquista-text{flex:1}
+.conquista-toast .conquista-title{color:var(--gold);font-weight:bold;font-size:.85rem}
+.conquista-toast .conquista-desc{color:var(--text2);font-size:.72rem;margin-top:2px}
+.conquistas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:12px}
+.conquista-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;gap:8px}
+.conquista-card.locked-conq{opacity:.35}
+.conquista-card .conquista-icon-sm{font-size:1.2rem}
+.conquista-card .conquista-info{flex:1}
+.conquista-card .conquista-info .conquista-nome{font-size:.78rem;color:var(--gold);font-weight:bold}
+.conquista-card .conquista-info .conquista-desc-sm{font-size:.68rem;color:var(--text2)}
+
+/* Music toggle */
+.music-toggle{background:none;border:1px solid var(--border);color:var(--text2);font-size:1rem;padding:2px 8px;border-radius:4px;cursor:pointer;transition:border-color .2s,color .2s;font-family:inherit}
+.music-toggle:hover{border-color:var(--gold);color:var(--gold)}
+
 /* Responsive */
 @media(max-width:768px){
 .title-glow{font-size:2.5rem}

@@ -448,6 +448,169 @@ km2Capturavel: new Set([
 // ============================================================
 // Utility: Weighted random choice
 // ============================================================
+// ============================================================
+// Sistema de Tipos/Elementos
+// ============================================================
+tipoChart: {
+  // Fogo > Planta > Agua > Fogo (triangulo)
+  // Sombra <> Luz (double weakness)
+  // Normal = neutro contra todos
+  "Fogo":   { forte: ["Planta"], fraco: ["Agua"] },
+  "Agua":   { forte: ["Fogo"],   fraco: ["Planta"] },
+  "Planta": { forte: ["Agua"],   fraco: ["Fogo"] },
+  "Sombra": { forte: ["Luz"],    fraco: ["Luz"] },
+  "Luz":    { forte: ["Sombra"], fraco: ["Sombra"] },
+  "Normal": { forte: [],         fraco: [] },
+},
+
+kreatureTipos: {
+  // Base
+  "Piki":        "Luz",
+  "Pikron":      "Luz",
+  "K-Bat":       "Sombra",
+  "K-Vampire":   "Sombra",
+  "K-Rat":       "Normal",
+  "K-Ratron":    "Normal",
+  "K-Mega":      "Normal",
+  "K-Megaron":   "Normal",
+  "K-Mag":       "Fogo",
+  "K-Magron":    "Fogo",
+  "K-Waterlim":  "Agua",
+  "K-Tidalim":   "Agua",
+  // Boss base
+  "K-Omega":     "Sombra",
+  // DLC1 — K-Far base
+  "K-Volkan":    "Fogo",
+  "K-Volcatron": "Fogo",
+  "Pikstorm":    "Agua",
+  "Pikstorm-X":  "Agua",
+  "K-Shadowbat": "Sombra",
+  "K-Nightlord": "Sombra",
+  "K-Terron":    "Planta",
+  "K-Terradon":  "Planta",
+  "K-Crystallis":"Luz",
+  "K-Prism":     "Luz",
+  "K-Aquaris":   "Agua",
+  "K-Abyssus":   "Agua",
+  "K-Spectral":  "Luz",
+  "K-Radiantis": "Luz",
+  "K-Dracovol":  "Fogo",
+  "K-Dracovon":  "Fogo",
+  "K-Stoneback": "Planta",
+  "K-Golemtron": "Planta",
+  "K-Umbra":     "Sombra",
+  "K-Voidling":  "Sombra",
+  // DLC1 — Corruptos
+  "K-Darkrat":   "Sombra",
+  "K-Sombra":    "Sombra",
+  "K-Corrupto":  "Sombra",
+  // DLC1 — Bosses
+  "K-Void":          "Sombra",
+  "K-Void Renascido":"Sombra",
+  // DLC3 — inimigos
+  "K-Master":    "Normal",
+  // KM2 — Suporte
+  "K-Healer":    "Luz",
+  "K-Shield":    "Normal",
+  "K-Booster":   "Fogo",
+  // KM2 — Exoticos
+  "K-Manipuler": "Sombra",
+  "K-Miroir":    "Luz",
+  "K-Ancora":    "Planta",
+  "K-Silencer":  "Sombra",
+  "K-Phantom":   "Sombra",
+  "K-Drain":     "Sombra",
+},
+
+getEfetividade(tipoAtk, tipoDef) {
+  const chart = this.tipoChart[tipoAtk];
+  if (!chart) return 1.0;
+  if (chart.forte.includes(tipoDef)) return 1.5;
+  if (chart.fraco.includes(tipoDef)) return 0.5;
+  return 1.0;
+},
+
+getTipoKreature(nome) {
+  return this.kreatureTipos[nome] || "Normal";
+},
+
+// ============================================================
+// K-Dex — Enciclopedia de Kreatures
+// ============================================================
+kdexEntries: {
+  // Base
+  "Piki":        {game:"Base",regiao:"K-Village",evolui_de:null,evolui_para:"Pikron"},
+  "Pikron":      {game:"Base",regiao:"K-Village",evolui_de:"Piki",evolui_para:null},
+  "K-Bat":       {game:"Base",regiao:"Cavernas",evolui_de:null,evolui_para:"K-Vampire"},
+  "K-Vampire":   {game:"Base",regiao:"Cavernas",evolui_de:"K-Bat",evolui_para:null},
+  "K-Rat":       {game:"Base",regiao:"Floresta",evolui_de:null,evolui_para:"K-Ratron"},
+  "K-Ratron":    {game:"Base",regiao:"Floresta",evolui_de:"K-Rat",evolui_para:null},
+  "K-Mega":      {game:"Base",regiao:"Cavernas",evolui_de:null,evolui_para:"K-Megaron"},
+  "K-Megaron":   {game:"Base",regiao:"Cavernas",evolui_de:"K-Mega",evolui_para:null},
+  "K-Mag":       {game:"Base",regiao:"Lava",evolui_de:null,evolui_para:"K-Magron"},
+  "K-Magron":    {game:"Base",regiao:"Lava",evolui_de:"K-Mag",evolui_para:null},
+  "K-Waterlim":  {game:"Base",regiao:"Praia",evolui_de:null,evolui_para:"K-Tidalim"},
+  "K-Tidalim":   {game:"Base",regiao:"Praia",evolui_de:"K-Waterlim",evolui_para:null},
+  "K-Omega":     {game:"Base",regiao:"K-Stadium",evolui_de:null,evolui_para:null},
+  // DLC1 — K-Far
+  "K-Volkan":    {game:"A Far Planet",regiao:"Vulcão",evolui_de:null,evolui_para:"K-Volcatron"},
+  "K-Volcatron": {game:"A Far Planet",regiao:"Vulcão",evolui_de:"K-Volkan",evolui_para:null},
+  "Pikstorm":    {game:"A Far Planet",regiao:"Glacial",evolui_de:null,evolui_para:"Pikstorm-X"},
+  "Pikstorm-X":  {game:"A Far Planet",regiao:"Glacial",evolui_de:"Pikstorm",evolui_para:null},
+  "K-Shadowbat": {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:null,evolui_para:"K-Nightlord"},
+  "K-Nightlord": {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:"K-Shadowbat",evolui_para:null},
+  "K-Terron":    {game:"A Far Planet",regiao:"Tempestade",evolui_de:null,evolui_para:"K-Terradon"},
+  "K-Terradon":  {game:"A Far Planet",regiao:"Tempestade",evolui_de:"K-Terron",evolui_para:null},
+  "K-Crystallis":{game:"A Far Planet",regiao:"Cavernas Cristalinas",evolui_de:null,evolui_para:"K-Prism"},
+  "K-Prism":     {game:"A Far Planet",regiao:"Cavernas Cristalinas",evolui_de:"K-Crystallis",evolui_para:null},
+  "K-Aquaris":   {game:"A Far Planet",regiao:"Glacial",evolui_de:null,evolui_para:"K-Abyssus"},
+  "K-Abyssus":   {game:"A Far Planet",regiao:"Glacial",evolui_de:"K-Aquaris",evolui_para:null},
+  "K-Spectral":  {game:"A Far Planet",regiao:"Tempestade",evolui_de:null,evolui_para:"K-Radiantis"},
+  "K-Radiantis": {game:"A Far Planet",regiao:"Tempestade",evolui_de:"K-Spectral",evolui_para:null},
+  "K-Dracovol":  {game:"A Far Planet",regiao:"Vulcão",evolui_de:null,evolui_para:"K-Dracovon"},
+  "K-Dracovon":  {game:"A Far Planet",regiao:"Vulcão",evolui_de:"K-Dracovol",evolui_para:null},
+  "K-Stoneback": {game:"A Far Planet",regiao:"Cavernas Cristalinas",evolui_de:null,evolui_para:"K-Golemtron"},
+  "K-Golemtron": {game:"A Far Planet",regiao:"Cavernas Cristalinas",evolui_de:"K-Stoneback",evolui_para:null},
+  "K-Umbra":     {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:null,evolui_para:"K-Voidling"},
+  "K-Voidling":  {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:"K-Umbra",evolui_para:null},
+  "K-Darkrat":   {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:null,evolui_para:null},
+  "K-Sombra":    {game:"A Far Planet",regiao:"Zona Sombria",evolui_de:null,evolui_para:null},
+  "K-Corrupto":  {game:"A Far Planet",regiao:"Tempestade",evolui_de:null,evolui_para:null},
+  "K-Void":      {game:"A Far Planet",regiao:"Portal do Vazio",evolui_de:null,evolui_para:null},
+  "K-Void Renascido":{game:"A Far Planet",regiao:"Portal do Vazio",evolui_de:null,evolui_para:null},
+  // KM2 — Suporte
+  "K-Healer":    {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Shield":    {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Booster":   {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  // KM2 — Exoticos
+  "K-Manipuler": {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Miroir":    {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Ancora":    {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Silencer":  {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Phantom":   {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+  "K-Drain":     {game:"KM2",regiao:"Área Exótica",evolui_de:null,evolui_para:null},
+},
+
+// ============================================================
+// Conquistas
+// ============================================================
+conquistas: {
+  primeiro_kreature:    {nome:"Primeiro Kreature",       desc:"Capture seu primeiro Kreature",           icone:"🥚"},
+  primeira_evolucao:    {nome:"Evolução!",               desc:"Evolua um Kreature pela primeira vez",    icone:"⬆️"},
+  primeira_medalha:     {nome:"Medalha de Honra",        desc:"Ganhe sua primeira medalha",              icone:"🏅"},
+  vencer_kmaster:       {nome:"Novo K-Master",           desc:"Derrote o K-Master",                      icone:"👑"},
+  vencer_komega:        {nome:"Deus dos Kreatures",      desc:"Derrote o K-Omega",                       icone:"💀"},
+  todas_base:           {nome:"Colecionador",            desc:"Capture todos os Kreatures base",         icone:"📦"},
+  final_secreto:        {nome:"Final Secreto",           desc:"Desbloqueie o final secreto",             icone:"🔮"},
+  final_alternativo:    {nome:"Lenda Alternativa",       desc:"Desbloqueie o final alternativo",         icone:"⭐"},
+  vencer_kvoid:         {nome:"Caçador do Vazio",        desc:"Derrote o K-Void",                        icone:"🕳️"},
+  dez_kreatures:        {nome:"Time Completo",           desc:"Tenha 10 Kreatures diferentes",           icone:"🎯"},
+  explorar_tudo_base:   {nome:"Explorador",              desc:"Visite todas as áreas do mapa base",      icone:"🗺️"},
+  primeira_captura_far: {nome:"Turista Espacial",        desc:"Capture um Kreature em K-Far",            icone:"🚀"},
+  competicao_km2:       {nome:"Campeão da Competition",  desc:"Complete todas as fases da K-Competition", icone:"🏆"},
+  pvp_primeira:         {nome:"Rival",                   desc:"Vença sua primeira batalha PvP",          icone:"⚔️"},
+},
+
 weightedChoice(tableOrItems, weights) {
   // Supports two formats:
   // 1. weightedChoice({name: weight, ...})  → returns key

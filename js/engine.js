@@ -607,6 +607,21 @@ const KMSave = {
   },
   setDlc3Komega(v) { this.set('dlc3_komega', v); },
 
+  // K-Dex
+  getKdex() { return this.get('kdex') || []; },
+  setKdex(v) { this.set('kdex', v); },
+  addKdexEntry(nome) {
+    const kdex = this.getKdex();
+    if (!kdex.includes(nome)) {
+      kdex.push(nome);
+      this.setKdex(kdex);
+    }
+  },
+
+  // Conquistas
+  getConquistas() { return this.get('conquistas') || []; },
+  setConquistas(v) { this.set('conquistas', v); },
+
   // KM2 save
   getKm2Save() {
     return this.get('km2_save') || {

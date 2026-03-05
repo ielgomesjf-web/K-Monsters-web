@@ -4,6 +4,7 @@
 KMGames.dlc2 = async function() {
   const E = KMEngine;
   const S = KMSave;
+  KMMusic.play('exploration');
 
   // ============================================================
   // INTRO
@@ -152,6 +153,7 @@ KMGames.dlc2 = async function() {
     // Encontro de equipe (25% chance)
     if (equipes[tile] && Math.random() < 0.25) {
       const equipeInimiga = equipes[tile][Math.floor(Math.random() * equipes[tile].length)];
+      equipeInimiga.forEach(k => S.addKdexEntry(k));
       E.clear();
       E.print(`Uma equipe aparece: ${equipeInimiga.join(', ')}!`, 'bold');
       await E.sleep(1000);
@@ -166,6 +168,7 @@ KMGames.dlc2 = async function() {
         const md = S.getBaseMedalhas();
         const cr = S.getDlc1Cristais();
         await KMCombat.combateEquipeDlc2(krs2, equipeInimiga, md, cr, kvoidPresente);
+        KMMusic.play('exploration');
       }
       await E.sleep(1000);
       await E.anyKey();

@@ -4,6 +4,7 @@
 KMGames.dlc1 = async function() {
   const E = KMEngine;
   const S = KMSave;
+  KMMusic.play('exploration');
 
   // ============================================================
   // INTRO
@@ -135,6 +136,8 @@ KMGames.dlc1 = async function() {
           kreatures[idx] = evoInfo.evolui_para;
           ev[k] = evoInfo.evolui_para;
           cr[evoInfo.evolui_para] = cr[k] || 0;
+          S.addKdexEntry(evoInfo.evolui_para);
+          KMConquista.desbloquear('primeira_evolucao');
         }
       }
       S.setDlc1Kreatures(kreatures);
@@ -182,6 +185,7 @@ KMGames.dlc1 = async function() {
       E.clear();
       E.print(`Um ${enemy} aparece!`, 'bold');
       await E.sleep(1000);
+      S.addKdexEntry(enemy);
 
       const act = await E.choice([
         {label: 'Lutar!', value: 'fight', primary: true},
@@ -193,6 +197,7 @@ KMGames.dlc1 = async function() {
         const md = S.getBaseMedalhas();
         const cr = S.getDlc1Cristais();
         const won = await KMCombat.combateDlc1(kreatures[0], enemy, kreatures, md, cr);
+        KMMusic.play('exploration');
 
         if (won) {
           // Crystal chance (18% in caves, 5% elsewhere)
@@ -211,6 +216,8 @@ KMGames.dlc1 = async function() {
             if (!kreatures.includes(enemy)) {
               kreatures.push(enemy);
               S.setDlc1Kreatures(kreatures);
+              S.addKdexEntry(enemy);
+              KMConquista.desbloquear('primeira_captura_far');
               E.print(`\n[ ${enemy} capturado! ]`, 'success');
             } else {
               cr[enemy] = (cr[enemy] || 0) + 1;
@@ -252,6 +259,8 @@ KMGames.dlc1 = async function() {
   const md = S.getBaseMedalhas();
   const cr = S.getDlc1Cristais();
 
+  S.addKdexEntry('K-Void');
+
   E.clear();
   let bossWon = await KMCombat.combateDlc1(kreatures[0], 'K-Void', kreatures, md, cr);
 
@@ -269,6 +278,8 @@ KMGames.dlc1 = async function() {
     E.print('\nK-VOID RENASCIDO!', 'boss-text');
     await E.sleep(2000);
     await E.anyKey();
+
+    S.addKdexEntry('K-Void Renascido');
 
     E.clear();
     bossWon = await KMCombat.combateDlc1(kreatures[0], 'K-Void Renascido', kreatures, md, cr);
@@ -289,6 +300,8 @@ KMGames.dlc1 = async function() {
 
     E.print('\nVocê fez isso. Você salvou K-Far.');
     await E.sleep(2000);
+
+    KMConquista.desbloquear('vencer_kvoid');
 
     if (temEvoluido && totalCr >= 6) {
       E.print('\n' + '═'.repeat(40), 'bold');
@@ -319,6 +332,7 @@ KMGames.dlc1 = async function() {
   // ============================================================
   // CRÉDITOS
   // ============================================================
+  KMMusic.stop();
   E.clear();
   E.print('═'.repeat(42), 'bold');
   E.print('  K-MONSTERS: A FAR PLANET', 'bold');

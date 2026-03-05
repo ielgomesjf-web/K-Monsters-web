@@ -3,12 +3,27 @@
 
 const KMCombat = {
 
+// Helper: apply type effectiveness multiplier and print message
+_applyTipo(dano, nomeAtk, nomeDef) {
+  const tipoAtk = KMData.getTipoKreature(nomeAtk);
+  const tipoDef = KMData.getTipoKreature(nomeDef);
+  const mult = KMData.getEfetividade(tipoAtk, tipoDef);
+  const d = Math.floor(dano * mult);
+  return { dano: d, mult, tipoAtk, tipoDef };
+},
+
+_printTipoMsg(E, mult) {
+  if (mult > 1) E.print('Super eficaz!', 'super-effective');
+  else if (mult < 1) E.print('Pouco eficaz...', 'not-effective');
+},
+
 // ============================================================
 // COMBAT 1 — Tutorial guiado (Piki vs K-Bat)
 // Mãe ensina cada ação passo-a-passo
 // ============================================================
 async combateComeco() {
   const E = KMEngine;
+  KMMusic.play('combat');
   let vidaPIKI = 15, vidaKBAT = 10;
   let bonus = 0, bloqueio = 0;
   let KSKusada = false, KSKKusada = false;
@@ -187,6 +202,8 @@ async combateComeco() {
 // ============================================================
 async combateBase(nomeJogador, nomeInimigo, timeJogador, medalhaData) {
   const E = KMEngine;
+  const isBoss = ['K-Mega','K-Waterlim','K-Mag','K-Omega'].includes(nomeInimigo);
+  KMMusic.play(isBoss ? 'boss' : 'combat');
   const stats = KMData.baseStats;
   if (!stats[nomeJogador] || !stats[nomeInimigo]) {
     E.print("Kreature não reconhecido !");
@@ -261,8 +278,11 @@ async combateBase(nomeJogador, nomeInimigo, timeJogador, medalhaData) {
       E.print(`${atual} ataca !`);
       let danocausado = kj.dano + kj.bonus - bloqueioI - debuff;
       if (danocausado < 0) danocausado = 0;
+      const tp = this._applyTipo(danocausado, atual, nomeInimigo);
+      danocausado = tp.dano;
       vidaI -= danocausado;
       E.print(`Incrível ! ${atual} causou ${danocausado} de dano !`);
+      this._printTipoMsg(E, tp.mult);
       await E.sleep(2000);
       kj.bonus = 0; bloqueioI = 0; debuff = 0;
       if (turnostravado > 0) turnostravado--;
@@ -277,8 +297,11 @@ async combateBase(nomeJogador, nomeInimigo, timeJogador, medalhaData) {
       if (efeito === 'trava') turnostravado = 2;
       else if (efeito === 'debuff') debuff = 3;
       else if (efeito === 'dano_extra') {
-        const d = kj.dano + 2; vidaI -= d;
+        let d = kj.dano + 2;
+        const tp2 = this._applyTipo(d, atual, nomeInimigo);
+        d = tp2.dano; vidaI -= d;
         E.print(`Causou ${d} de dano extra !`);
+        this._printTipoMsg(E, tp2.mult);
       } else if (efeito === 'bonus_forte') kj.bonus += 4;
       else if (efeito === 'cura') {
         kj.vida = Math.min(kj.vida + 5, kj.vida_max);
@@ -311,8 +334,11 @@ async combateBase(nomeJogador, nomeInimigo, timeJogador, medalhaData) {
         E.print(`O ${nomeInimigo} ataca !`);
         let danoR = danoI + bonusI - kj.bloqueio;
         if (danoR < 0) danoR = 0;
+        const tpE = this._applyTipo(danoR, nomeInimigo, atual);
+        danoR = tpE.dano;
         kj.vida -= danoR;
         E.print(`${atual} tomou ${danoR} de dano !`);
+        this._printTipoMsg(E, tpE.mult);
         kj.bloqueio = 0; bonusI = 0;
       } else {
         E.print(`O ${nomeInimigo} está travado e não consegue agir !`);
@@ -373,6 +399,7 @@ _aplicarKSkillDlc1(efeito, kj, vidaI, turnostravado, debuff) {
 // ============================================================
 async combateDlc1(nomeJogador, nomeInimigo, timeJogadorNomes, medalhaData, cristalData) {
   const E = KMEngine;
+  KMMusic.play(nomeInimigo.startsWith('K-Void') ? 'boss' : 'combat');
   const stats = KMData.dlc1Stats;
   if (!stats[nomeJogador] || !stats[nomeInimigo]) { E.print("Kreature não reconhecido!"); return false; }
   if (!timeJogadorNomes) timeJogadorNomes = [nomeJogador];
@@ -437,8 +464,11 @@ async combateDlc1(nomeJogador, nomeInimigo, timeJogadorNomes, medalhaData, crist
 
     if (escolha === '1') {
       let d = Math.max(0, kj.dano + kj.bonus - bloqueioI - debuff);
+      const tp = this._applyTipo(d, atual, nomeInimigo);
+      d = tp.dano;
       vidaI -= d;
       E.print(`${atual} ataca! Causou ${d} de dano!`);
+      this._printTipoMsg(E, tp.mult);
       await E.sleep(1000);
       kj.bonus = 0; bloqueioI = 0; debuff = 0;
       if (turnostravado > 0) turnostravado--;
@@ -465,9 +495,12 @@ async combateDlc1(nomeJogador, nomeInimigo, timeJogadorNomes, medalhaData, crist
     kj = timeVidas[atual];
     if (a === 1) {
       if (turnostravado <= 0) {
-        const d = Math.max(0, danoI + bonusI - kj.bloqueio);
+        let d = Math.max(0, danoI + bonusI - kj.bloqueio);
+        const tpE = this._applyTipo(d, nomeInimigo, atual);
+        d = tpE.dano;
         kj.vida -= d;
         E.print(`O ${nomeInimigo} ataca! ${atual} tomou ${d} de dano!`);
+        this._printTipoMsg(E, tpE.mult);
         kj.bloqueio = 0; bonusI = 0;
       } else { E.print(`O ${nomeInimigo} está travado!`); turnostravado--; }
     } else if (a === 3 && !KSKIusada) {
@@ -501,6 +534,7 @@ async combateDlc1(nomeJogador, nomeInimigo, timeJogadorNomes, medalhaData, crist
 // ============================================================
 async combateEquipeDlc2(timeNomes, inimigosNomes, medalhas, cristais, kvoidPresente) {
   const E = KMEngine;
+  KMMusic.play('combat');
   const stats = KMData.dlc1Stats;
   const KFAR = KMData.KREATURES_PLANETA;
 
@@ -611,9 +645,12 @@ async combateEquipeDlc2(timeNomes, inimigosNomes, medalhas, cristais, kvoidPrese
         alvoKey = alvosKeys[ai] || alvosKeys[0];
       }
       const e = inimigos[alvoKey];
-      const d = Math.max(0, kj.dano + kj.bonus - e.bloqueio);
+      let d = Math.max(0, kj.dano + kj.bonus - e.bloqueio);
+      const tp = this._applyTipo(d, atual, e.nome_display);
+      d = tp.dano;
       e.vida -= d;
       E.print(`${atual} ataca ${e.nome_display}! Causou ${d} de dano!`);
+      this._printTipoMsg(E, tp.mult);
       await E.sleep(1000); kj.bonus = 0; e.bloqueio = 0;
     } else if (escolha === '2') {
       E.print(`${atual} defende!`); kj.bloqueio += 4; kj.bonus += 1;
@@ -657,9 +694,12 @@ async combateEquipeDlc2(timeNomes, inimigosNomes, medalhas, cristais, kvoidPrese
       const alvo = timeJogador[alvoNome];
       const acao = KMData.weightedChoice([1,2,3],[60,20,20]);
       if (acao === 1) {
-        const d = Math.max(0, e.dano + e.bonus - alvo.bloqueio);
+        let d = Math.max(0, e.dano + e.bonus - alvo.bloqueio);
+        const tpE = this._applyTipo(d, e.nome_display, alvoNome);
+        d = tpE.dano;
         alvo.vida -= d;
         E.print(`${e.nome_display} ataca ${alvoNome}! Tomou ${d} de dano!`);
+        this._printTipoMsg(E, tpE.mult);
         alvo.bloqueio = 0; e.bonus = 0;
       } else if (acao === 2) {
         E.print(`${e.nome_display} se prepara...`); e.bonus += 2; e.bloqueio += 1;
@@ -706,6 +746,7 @@ async combateEquipeDlc2(timeNomes, inimigosNomes, medalhas, cristais, kvoidPrese
 // ============================================================
 async combateKOmega(komega, inimigosNomes) {
   const E = KMEngine;
+  KMMusic.play(inimigosNomes.includes('K-Master') ? 'boss' : 'combat');
   const STATS = KMData.dlc3InimigoStats;
   const KSKILLS = KMData.dlc3KSkills;
   const ABSORCAO = KMData.dlc3AbsorcaoSkills;
@@ -756,9 +797,12 @@ async combateKOmega(komega, inimigosNomes) {
         alvoKey = alvosKeys[ai] || alvosKeys[0];
       }
       const e = inimigos[alvoKey];
-      const d = Math.max(0, komega.dano + koBonus - e.bloqueio);
+      let d = Math.max(0, komega.dano + koBonus - e.bloqueio);
+      const tp = this._applyTipo(d, 'K-Omega', e.nome_display);
+      d = tp.dano;
       e.vida -= d;
       E.print(`K-Omega ataca ${e.nome_display}! Causou ${d} de dano!`);
+      this._printTipoMsg(E, tp.mult);
       await E.sleep(1000); koBonus = 0; e.bloqueio = 0;
     } else if (escolha === '2') {
       E.print("K-Omega se prepara..."); koBloqueio += 5; koBonus += 2;
@@ -806,8 +850,11 @@ async combateKOmega(komega, inimigosNomes) {
       if (koVida <= 0) break;
       const acao = KMData.weightedChoice([1,2,3],[60,20,20]);
       if (acao === 1) {
-        const d = Math.max(0, e.dano + e.bonus - koBloqueio);
+        let d = Math.max(0, e.dano + e.bonus - koBloqueio);
+        const tpE = this._applyTipo(d, e.nome_display, 'K-Omega');
+        d = tpE.dano;
         koVida -= d; E.print(`${e.nome_display} ataca! K-Omega tomou ${d} de dano!`);
+        this._printTipoMsg(E, tpE.mult);
         koBloqueio = 0; e.bonus = 0;
       } else if (acao === 2) {
         E.print(`${e.nome_display} se prepara...`); e.bonus += 2; e.bloqueio += 1;
@@ -848,6 +895,7 @@ async combateKOmega(komega, inimigosNomes) {
 // ============================================================
 async combateKM2(timeJNomes, inimigosNomes, save, wild) {
   const E = KMEngine;
+  KMMusic.play('combat');
   const STATS = KMData.km2Stats;
   const EFEITOS = KMData.km2KSkillEfeitos;
 
@@ -934,9 +982,12 @@ async combateKM2(timeJNomes, inimigosNomes, save, wild) {
           const ai = parseInt(await E.choice(ao));
           alvo = vi[ai] || vi[0];
         }
-        const d = Math.max(0, k.dano + k.round_bonus_atk - alvo.round_bonus_def);
+        let d = Math.max(0, k.dano + k.round_bonus_atk - alvo.round_bonus_def);
+        const tp = this._applyTipo(d, k.nome, alvo.nome);
+        d = tp.dano;
         alvo.vida -= d;
         E.print(`  ${k.nome} ataca ${alvo.nome}! ${d} de dano!`);
+        this._printTipoMsg(E, tp.mult);
         await E.sleep(600);
       } else if (esc === '2' && !k.kskill_usada) {
         k.kskill_usada = true;
@@ -998,9 +1049,12 @@ async combateKM2(timeJNomes, inimigosNomes, save, wild) {
       const alvo = vj[Math.floor(Math.random() * vj.length)];
 
       if (acao === 1) {
-        const d = Math.max(0, inimigo.dano + (inimigo.round_bonus_atk||0) - alvo.round_bonus_def);
+        let d = Math.max(0, inimigo.dano + (inimigo.round_bonus_atk||0) - alvo.round_bonus_def);
+        const tpE = this._applyTipo(d, inimigo.nome, alvo.nome);
+        d = tpE.dano;
         alvo.vida -= d;
         E.print(`  ${inimigo.nome} ataca ${alvo.nome}! ${d} de dano!`);
+        this._printTipoMsg(E, tpE.mult);
       } else if (acao === 2) {
         inimigo.round_bonus_atk = (inimigo.round_bonus_atk||0) + 2;
         E.print(`  ${inimigo.nome} se prepara...`);

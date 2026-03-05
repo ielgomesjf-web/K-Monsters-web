@@ -4,6 +4,7 @@
 KMGames.km2 = async function() {
   const E = KMEngine;
   const S = KMSave;
+  KMMusic.play('exploration');
 
   // ============================================================
   // TÍTULO
@@ -267,6 +268,8 @@ KMGames.km2 = async function() {
     save.kreatures['K-Rat'] = { medalhas: 0 };
     save.time = ['K-Rat'];
     S.setKm2Save(save);
+    S.addKdexEntry('K-Rat');
+    KMConquista.desbloquear('primeiro_kreature');
   }
 
   // Stadium event on first entry
@@ -421,6 +424,7 @@ KMGames.km2 = async function() {
       }
 
       const equipe = areaKreatures[novaArea][Math.floor(Math.random() * areaKreatures[novaArea].length)];
+      equipe.forEach(k => S.addKdexEntry(k));
       E.clear();
       E.print(`${equipe.join('  e  ')} aparecem!`, 'bold');
       await E.sleep(500);
@@ -434,6 +438,7 @@ KMGames.km2 = async function() {
         const result = await KMCombat.combateKM2(save.time, equipe, save, true);
         save = result.save;
         S.setKm2Save(save);
+        KMMusic.play('exploration');
       }
       await E.anyKey();
     }
@@ -457,6 +462,7 @@ KMGames.km2 = async function() {
   await E.sleep(2000);
   E.print('K-Omega aparece à sua frente.');
   await E.sleep(4000);
+  S.addKdexEntry('K-Omega');
 
   E.print('\nEle para.');
   await E.sleep(2000);
@@ -497,6 +503,7 @@ KMGames.km2 = async function() {
   E.clear();
   E.print('K-Void.', 'boss-text');
   await E.sleep(4000);
+  S.addKdexEntry('K-Void');
   E.print('Aqui.');
   await E.sleep(3000);
   E.print('Neste lugar isolado do mundo.');
@@ -800,6 +807,7 @@ KMGames._km2Competition = async function(E, save) {
 
     if (faseAtual === fases.length - 1) {
       E.print('\nVocê é o Campeão da K-Competition!', 'bold');
+      KMConquista.desbloquear('competicao_km2');
       await E.sleep(2000);
     } else if (!save.area_exotica && save.moedas >= 350) {
       E.print('\n[ Moedas suficientes para acessar a Área Exótica! ]', 'info');

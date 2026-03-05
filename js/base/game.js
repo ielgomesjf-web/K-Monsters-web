@@ -4,6 +4,7 @@
 KMGames.base = async function() {
   const E = KMEngine;
   const S = KMSave;
+  KMMusic.play('exploration');
 
   let capitulo = S.getBaseCapitulo();
 
@@ -87,6 +88,9 @@ KMGames.base = async function() {
 
     let kreatures = S.getBaseKreatures();
     if (!kreatures.includes('Piki')) kreatures.push('Piki');
+    S.addKdexEntry('Piki');
+    S.addKdexEntry('K-Bat');
+    KMConquista.desbloquear('primeiro_kreature');
 
     if (ganhou) {
       E.print('\nMãe: "Muito bem! Você pegou o jeito!"', 'success');
@@ -148,6 +152,7 @@ KMGames.base = async function() {
     const treinoSpawn = KMData.weightedChoice(KMData.baseSpawns['F']);
     E.print(`\nUm ${treinoSpawn} aparece!`, 'bold');
     await E.sleep(1000);
+    S.addKdexEntry(treinoSpawn);
 
     let kreatures = S.getBaseKreatures();
     const treinoWon = await KMCombat.combateBase(kreatures[0], treinoSpawn, kreatures, S.getBaseMedalhas());
@@ -356,6 +361,8 @@ KMGames.base = async function() {
             ev[k] = evoInfo.evolui_para;
             md[evoInfo.evolui_para] = md[k] || 0;
             evolved = true;
+            S.addKdexEntry(evoInfo.evolui_para);
+            KMConquista.desbloquear('primeira_evolucao');
           }
         }
         if (evolved) {
@@ -374,6 +381,7 @@ KMGames.base = async function() {
         E.clear();
         E.print(`Um ${enemy} selvagem aparece!`, 'bold');
         await E.sleep(1000);
+        S.addKdexEntry(enemy);
 
         const act = await E.choice([
           {label: 'Lutar!', value: 'fight', primary: true},
@@ -384,6 +392,7 @@ KMGames.base = async function() {
           kreatures = S.getBaseKreatures();
           const md = S.getBaseMedalhas();
           const won = await KMCombat.combateBase(kreatures[0], enemy, kreatures, md);
+          KMMusic.play('exploration');
 
           if (won) {
             // Medal chance (3% in caves, 1% elsewhere)
@@ -394,6 +403,7 @@ KMGames.base = async function() {
               if (md[lucky] > 3) md[lucky] = 3;
               S.setBaseMedalhas(md);
               E.print(`\n★ ${lucky} ganhou uma MEDALHA! (${md[lucky]}/3) ★`, 'bold');
+              KMConquista.desbloquear('primeira_medalha');
               await E.sleep(2000);
             }
 
@@ -405,6 +415,10 @@ KMGames.base = async function() {
                 kreatures.push(enemy);
                 S.setBaseKreatures(kreatures);
                 E.print(`\n[ ${enemy} capturado! ]`, 'success');
+                S.addKdexEntry(enemy);
+                if (kreatures.length >= 10) KMConquista.desbloquear('dez_kreatures');
+                const baseNames = ['Piki','K-Bat','K-Rat','K-Mega','K-Mag','K-Waterlim'];
+                if (baseNames.every(n => kreatures.includes(n))) KMConquista.desbloquear('todas_base');
               } else {
                 // Already have — earn medal
                 md[enemy] = (md[enemy] || 0) + 1;
@@ -523,6 +537,10 @@ KMGames.base = async function() {
     await E.sleep(3000);
 
     S.set('base_ending', 'secreto');
+    S.addKdexEntry('K-Omega');
+    KMConquista.desbloquear('vencer_komega');
+    KMConquista.desbloquear('final_secreto');
+    KMConquista.desbloquear('vencer_kmaster');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('    FINAL SECRETO DESBLOQUEADO', 'bold');
     E.print('', 'bold');
@@ -545,6 +563,8 @@ KMGames.base = async function() {
     await E.sleep(2000);
 
     S.set('base_ending', 'alternativo');
+    KMConquista.desbloquear('final_alternativo');
+    KMConquista.desbloquear('vencer_kmaster');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('  VOCÊ É O K-MASTER LENDÁRIO !!!', 'bold');
     E.print('  Poucos jogadores chegam até aqui.', 'bold');
@@ -561,6 +581,7 @@ KMGames.base = async function() {
     await E.sleep(2000);
 
     S.set('base_ending', 'normal');
+    KMConquista.desbloquear('vencer_kmaster');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('   PARABÉNS ! VOCÊ É O NOVO K-MASTER !', 'bold');
     E.print('═'.repeat(40), 'bold');

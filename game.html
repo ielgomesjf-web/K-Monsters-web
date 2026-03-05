@@ -27,6 +27,7 @@
 <div class="game-header">
 <h1>K-MONSTERS</h1>
 <div class="user-display" id="user-display"></div>
+<button class="music-toggle" id="music-toggle-btn" onclick="KMMusic.toggleMute()" title="Música">🔊</button>
 <button class="mobile-menu-btn" onclick="document.getElementById('game-menu').classList.toggle('open')">☰</button>
 <a href="index.html" class="back-link">← Voltar ao site</a>
 </div>
@@ -62,6 +63,12 @@ Pacote Completo
 <div class="menu-title">OPÇÕES</div>
 <button class="menu-btn key-btn" onclick="KM.activateKey()">Ativar Chave
 <span class="menu-sub">Inserir chave de 25 dígitos</span>
+</button>
+<button class="menu-btn" onclick="KMKdex.show()">K-Dex
+<span class="menu-sub">Enciclopédia de Kreatures</span>
+</button>
+<button class="menu-btn" onclick="KMPvP.start()">PvP Local
+<span class="menu-sub">Batalha 2 jogadores</span>
 </button>
 <button class="menu-btn" onclick="KMProfile.show()">Perfil
 <span class="menu-sub">Seus stats e conquistas</span>
