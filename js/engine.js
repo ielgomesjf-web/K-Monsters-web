@@ -584,6 +584,8 @@ const KMSave = {
   setBaseEvolucao(v) { this.set('evolucao', v); },
   getBaseNomes() { return this.get('nomes') || {}; },
   setBaseNomes(v) { this.set('nomes', v); },
+  getBaseCapitulo() { return this.get('base_capitulo') || 1; },
+  setBaseCapitulo(v) { this.set('base_capitulo', v); },
 
   // DLC1 save
   getDlc1Kreatures() { return this.get('dlc1_kreatures') || this.getBaseKreatures(); },
