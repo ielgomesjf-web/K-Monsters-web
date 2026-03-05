@@ -28,9 +28,11 @@ const KMEngine = {
     this._output.scrollTop = this._output.scrollHeight;
   },
 
-  // Print separator
+  // Print separator (responsive — fewer chars on mobile)
   separator() {
-    this.print('─'.repeat(70), 'separator');
+    const w = window.innerWidth;
+    const count = w < 500 ? 30 : w < 768 ? 50 : 70;
+    this.print('─'.repeat(count), 'separator');
   },
 
   // Clear output
@@ -187,7 +189,8 @@ const KMEngine = {
     const grid = document.createElement('div');
     grid.className = 'map-grid';
     const cols = mapData[0].length;
-    grid.style.gridTemplateColumns = `repeat(${cols}, 42px)`;
+    const cellSize = window.innerWidth < 500 ? Math.max(24, Math.floor((window.innerWidth - 40) / cols)) : 42;
+    grid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
 
     for (let y = 0; y < mapData.length; y++) {
       for (let x = 0; x < cols; x++) {
@@ -201,6 +204,10 @@ const KMEngine = {
         } else {
           cell.className = `map-cell ${tile}`;
           cell.textContent = tile;
+        }
+        if (window.innerWidth < 500) {
+          cell.style.width = cellSize + 'px';
+          cell.style.height = cellSize + 'px';
         }
         grid.appendChild(cell);
       }
@@ -377,11 +384,94 @@ const KMEngine = {
 };
 
 // ============================================================
+// Avatar options
+// ============================================================
+const KM_AVATARS = ['🐉','🦇','🐺','🔥','💎','⚡','🌊','🌿','👾','🎮','⭐','🏆','🐲','🦅','🐍','💀'];
+
+// ============================================================
+// Credits badge — special emoji for credited people
+// ============================================================
+const KM_CREDITS = [
+  { names: ['gomes', 'gtc', 'gomes, the coder', 'gomesthecoder'], initials: 'GTC' },
+  { names: ['fábio', 'fabio', 'fsc', 'fábio souza costa', 'fabio souza costa'], initials: 'FSC' },
+  { names: ['joãobloxstars', 'joaobloxstars'], initials: 'JBS' },
+  { names: ['léo', 'leo', 'léo evaristo', 'leo evaristo'], initials: 'LE' },
+  { names: ['gugacoder', 'guga'], initials: 'GC' },
+  { names: ['bdg', 'bruna', 'bruna dias gomes'], initials: 'BDG' },
+  { names: ['azuospy', 'lucas gomes', 'lucas gomes s'], initials: 'LGS' },
+];
+
+function kmCreditBadge(username) {
+  if (!username) return null;
+  const lower = username.toLowerCase().trim();
+  for (const entry of KM_CREDITS) {
+    for (const name of entry.names) {
+      if (lower === name || lower.includes(name)) return entry.initials;
+    }
+  }
+  return null;
+}
+
+// ============================================================
 // Save/Load via localStorage
 // ============================================================
 
 const KMSave = {
   _prefix: 'km_',
+
+  // Set prefix for a specific user
+  setUser(username) {
+    this._prefix = 'km_' + username + '_';
+    localStorage.setItem('km_current_user', username);
+    // Track this user in the users list
+    const users = this.listUsers();
+    if (!users.includes(username)) {
+      users.push(username);
+      localStorage.setItem('km_users_list', JSON.stringify(users));
+    }
+  },
+
+  getUser() {
+    return localStorage.getItem('km_current_user') || null;
+  },
+
+  listUsers() {
+    try {
+      return JSON.parse(localStorage.getItem('km_users_list')) || [];
+    } catch { return []; }
+  },
+
+  logout() {
+    localStorage.removeItem('km_current_user');
+    this._prefix = 'km_';
+  },
+
+  // Migrate anonymous saves (km_*) to user-prefixed saves
+  _migrateOldSaves(username) {
+    const newPrefix = 'km_' + username + '_';
+    const oldKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      // Match keys starting with km_ but NOT km_{user}_ and NOT meta keys
+      if (k.startsWith('km_') && !k.startsWith('km_current_user') && !k.startsWith('km_users_list') && !k.startsWith('km_user_')) {
+        // Check if this is already a user-prefixed key
+        const users = this.listUsers();
+        let isUserKey = false;
+        for (const u of users) {
+          if (k.startsWith('km_' + u + '_')) { isUserKey = true; break; }
+        }
+        if (!isUserKey) oldKeys.push(k);
+      }
+    }
+    if (oldKeys.length === 0) return;
+    oldKeys.forEach(k => {
+      const suffix = k.slice(3); // remove 'km_'
+      const newKey = newPrefix + suffix;
+      if (!localStorage.getItem(newKey)) {
+        localStorage.setItem(newKey, localStorage.getItem(k));
+      }
+    });
+  },
 
   get(key) {
     try {
@@ -406,6 +496,38 @@ const KMSave = {
     }
     keys.forEach(k => localStorage.removeItem(k));
   },
+
+  // SHA-256 hash (Web Crypto API, fallback djb2 for file://)
+  async hashPassword(plaintext) {
+    if (window.crypto && window.crypto.subtle) {
+      try {
+        const data = new TextEncoder().encode(plaintext);
+        const buf = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch(e) { /* fallback */ }
+    }
+    // djb2 fallback
+    let hash = 5381;
+    for (let i = 0; i < plaintext.length; i++) {
+      hash = ((hash << 5) + hash) + plaintext.charCodeAt(i);
+      hash = hash & hash; // Convert to 32bit int
+    }
+    return 'djb2_' + (hash >>> 0).toString(16);
+  },
+
+  // User metadata (global, not per-save-prefix)
+  getUserPass(username) { return localStorage.getItem('km_user_' + username + '_pass'); },
+  setUserPass(username, hash) { localStorage.setItem('km_user_' + username + '_pass', hash); },
+  getUserAvatar(username) { return localStorage.getItem('km_user_' + username + '_avatar'); },
+  setUserAvatar(username, emoji) { localStorage.setItem('km_user_' + username + '_avatar', emoji); },
+  getUserCreated(username) { return localStorage.getItem('km_user_' + username + '_created'); },
+  setUserCreated(username) {
+    if (!this.getUserCreated(username)) {
+      localStorage.setItem('km_user_' + username + '_created', new Date().toISOString());
+    }
+  },
+  getUserLastLogin(username) { return localStorage.getItem('km_user_' + username + '_lastlogin'); },
+  setUserLastLogin(username) { localStorage.setItem('km_user_' + username + '_lastlogin', new Date().toISOString()); },
 
   // Base game save
   getBaseKreatures() { return this.get('kreatures') || []; },
@@ -565,8 +687,386 @@ const KM = {
   },
 };
 
+// ============================================================
+// Auth system (local, no password)
+// ============================================================
+
+const KMAuth = {
+  init() {
+    const user = KMSave.getUser();
+    if (user) {
+      KMSave.setUser(user); // restore prefix
+      this._updateHeader(user);
+      this._hideLoginScreen();
+    } else {
+      this._showLoginScreen();
+    }
+  },
+
+  // Step 1: user typed name and clicked CONTINUAR
+  startLogin(username) {
+    username = (username || '').trim();
+    if (!username) return;
+    const users = KMSave.listUsers();
+    const exists = users.includes(username);
+    if (exists) {
+      const hasPass = KMSave.getUserPass(username);
+      if (hasPass) {
+        this._showPasswordForm(username);
+      } else {
+        this._showSetPasswordForm(username);
+      }
+    } else {
+      this._showRegisterForm(username);
+    }
+  },
+
+  // Existing user with password — ask for it
+  _showPasswordForm(username) {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+    form.innerHTML = '';
+
+    const title = document.createElement('p');
+    title.className = 'login-sub';
+    title.textContent = 'Senha para ' + username;
+    form.appendChild(title);
+
+    const passInput = document.createElement('input');
+    passInput.type = 'password';
+    passInput.className = 'login-pass';
+    passInput.placeholder = 'Sua senha...';
+    passInput.autocomplete = 'off';
+    form.appendChild(passInput);
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'login-error hidden';
+    errorDiv.textContent = 'Senha incorreta!';
+    form.appendChild(errorDiv);
+
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.gap = '8px';
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'login-back';
+    backBtn.textContent = 'Voltar';
+    backBtn.addEventListener('click', () => this._restoreLoginForm());
+    btnWrap.appendChild(backBtn);
+
+    const okBtn = document.createElement('button');
+    okBtn.className = 'login-btn';
+    okBtn.textContent = 'ENTRAR';
+    okBtn.addEventListener('click', async () => {
+      const hash = await KMSave.hashPassword(passInput.value);
+      if (hash === KMSave.getUserPass(username)) {
+        this._doLogin(username);
+      } else {
+        errorDiv.classList.remove('hidden');
+        passInput.value = '';
+        passInput.focus();
+      }
+    });
+    btnWrap.appendChild(okBtn);
+    form.appendChild(btnWrap);
+
+    passInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') okBtn.click();
+    });
+    passInput.focus();
+  },
+
+  // Existing user without password (legacy) — offer to set one
+  _showSetPasswordForm(username) {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+    form.innerHTML = '';
+
+    const title = document.createElement('p');
+    title.className = 'login-sub';
+    title.textContent = 'Definir senha para ' + username;
+    form.appendChild(title);
+
+    const passInput = document.createElement('input');
+    passInput.type = 'password';
+    passInput.className = 'login-pass';
+    passInput.placeholder = 'Nova senha...';
+    passInput.autocomplete = 'off';
+    form.appendChild(passInput);
+
+    const confirmInput = document.createElement('input');
+    confirmInput.type = 'password';
+    confirmInput.className = 'login-pass';
+    confirmInput.placeholder = 'Confirmar senha...';
+    confirmInput.autocomplete = 'off';
+    form.appendChild(confirmInput);
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'login-error hidden';
+    form.appendChild(errorDiv);
+
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.gap = '8px';
+    btnWrap.style.flexWrap = 'wrap';
+
+    const skipBtn = document.createElement('button');
+    skipBtn.className = 'login-back';
+    skipBtn.textContent = 'Pular';
+    skipBtn.addEventListener('click', () => this._doLogin(username));
+    btnWrap.appendChild(skipBtn);
+
+    const okBtn = document.createElement('button');
+    okBtn.className = 'login-btn';
+    okBtn.style.flex = '1';
+    okBtn.textContent = 'DEFINIR SENHA';
+    okBtn.addEventListener('click', async () => {
+      if (!passInput.value) {
+        errorDiv.textContent = 'Digite uma senha!';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      if (passInput.value !== confirmInput.value) {
+        errorDiv.textContent = 'Senhas não coincidem!';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      const hash = await KMSave.hashPassword(passInput.value);
+      KMSave.setUserPass(username, hash);
+      this._doLogin(username);
+    });
+    btnWrap.appendChild(okBtn);
+    form.appendChild(btnWrap);
+
+    confirmInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') okBtn.click();
+    });
+    passInput.focus();
+  },
+
+  // New user — password + confirm + avatar
+  _showRegisterForm(username) {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+    form.innerHTML = '';
+
+    const title = document.createElement('p');
+    title.className = 'login-sub';
+    title.textContent = 'Novo jogador: ' + username;
+    form.appendChild(title);
+
+    const passInput = document.createElement('input');
+    passInput.type = 'password';
+    passInput.className = 'login-pass';
+    passInput.placeholder = 'Criar senha...';
+    passInput.autocomplete = 'off';
+    form.appendChild(passInput);
+
+    const confirmInput = document.createElement('input');
+    confirmInput.type = 'password';
+    confirmInput.className = 'login-pass';
+    confirmInput.placeholder = 'Confirmar senha...';
+    confirmInput.autocomplete = 'off';
+    form.appendChild(confirmInput);
+
+    // Avatar selection
+    const avatarLabel = document.createElement('p');
+    avatarLabel.className = 'login-sub';
+    avatarLabel.style.marginTop = '12px';
+    avatarLabel.style.marginBottom = '8px';
+    avatarLabel.textContent = 'Escolha seu avatar:';
+    form.appendChild(avatarLabel);
+
+    const avatarGrid = document.createElement('div');
+    avatarGrid.className = 'avatar-grid';
+    let selectedAvatar = '👾';
+    KM_AVATARS.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.className = 'avatar-btn' + (emoji === selectedAvatar ? ' selected' : '');
+      btn.textContent = emoji;
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        avatarGrid.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedAvatar = emoji;
+      });
+      avatarGrid.appendChild(btn);
+    });
+    form.appendChild(avatarGrid);
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'login-error hidden';
+    form.appendChild(errorDiv);
+
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.gap = '8px';
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'login-back';
+    backBtn.textContent = 'Voltar';
+    backBtn.addEventListener('click', () => this._restoreLoginForm());
+    btnWrap.appendChild(backBtn);
+
+    const okBtn = document.createElement('button');
+    okBtn.className = 'login-btn';
+    okBtn.style.flex = '1';
+    okBtn.textContent = 'REGISTRAR';
+    okBtn.addEventListener('click', async () => {
+      if (!passInput.value) {
+        errorDiv.textContent = 'Digite uma senha!';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      if (passInput.value !== confirmInput.value) {
+        errorDiv.textContent = 'Senhas não coincidem!';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      const hash = await KMSave.hashPassword(passInput.value);
+      KMSave.setUserPass(username, hash);
+      KMSave.setUserAvatar(username, selectedAvatar);
+      KMSave.setUserCreated(username);
+      // Migrate old saves if first user
+      const users = KMSave.listUsers();
+      if (users.length === 0) {
+        KMSave._migrateOldSaves(username);
+      }
+      this._doLogin(username);
+    });
+    btnWrap.appendChild(okBtn);
+    form.appendChild(btnWrap);
+
+    confirmInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') okBtn.click();
+    });
+    passInput.focus();
+  },
+
+  // Restore the initial login form (name input + CONTINUAR)
+  _restoreLoginForm() {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+    const input = document.getElementById('login-input');
+    const btn = document.getElementById('login-btn');
+    form.innerHTML = '';
+    // Re-create name input
+    const newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.id = 'login-input';
+    newInput.placeholder = 'Seu nome...';
+    newInput.maxLength = 20;
+    newInput.autocomplete = 'off';
+    newInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') KMAuth.startLogin(newInput.value);
+    });
+    form.appendChild(newInput);
+
+    const newBtn = document.createElement('button');
+    newBtn.className = 'login-btn';
+    newBtn.id = 'login-btn';
+    newBtn.textContent = 'CONTINUAR';
+    newBtn.addEventListener('click', () => KMAuth.startLogin(newInput.value));
+    form.appendChild(newBtn);
+    newInput.focus();
+  },
+
+  // Execute login after validation
+  _doLogin(username) {
+    KMSave.setUser(username);
+    KMSave.setUserCreated(username);
+    KMSave.setUserLastLogin(username);
+    if (!KMSave.getUserAvatar(username)) {
+      KMSave.setUserAvatar(username, '👾');
+    }
+    this._updateHeader(username);
+    this._hideLoginScreen();
+  },
+
+  logout() {
+    KMSave.logout();
+    // Clear game state
+    if (KMEngine._abortCtrl) KMEngine._abortCtrl.abort();
+    KMEngine.init();
+    KMEngine.clear();
+    KMEngine._input.classList.add('hidden');
+    KMEngine._input.innerHTML = '';
+    KMEngine.hideMap();
+    this._updateHeader(null);
+    this._showLoginScreen();
+  },
+
+  _updateHeader(username) {
+    let el = document.getElementById('user-display');
+    if (!el) return;
+    if (username) {
+      el.innerHTML = '';
+      const avatar = KMSave.getUserAvatar(username) || '👾';
+      const avatarSpan = document.createElement('span');
+      avatarSpan.className = 'user-avatar';
+      avatarSpan.textContent = avatar;
+      el.appendChild(avatarSpan);
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'user-name';
+      nameSpan.textContent = username;
+      el.appendChild(nameSpan);
+      const badge = kmCreditBadge(username);
+      if (badge) {
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'credit-badge';
+        badgeSpan.textContent = '👑 (' + badge + ')';
+        badgeSpan.title = 'Nos créditos do jogo!';
+        el.appendChild(badgeSpan);
+      }
+      const logoutBtn = document.createElement('button');
+      logoutBtn.className = 'user-logout';
+      logoutBtn.textContent = 'Trocar';
+      logoutBtn.addEventListener('click', () => KMAuth.logout());
+      el.appendChild(logoutBtn);
+    } else {
+      el.innerHTML = '';
+    }
+  },
+
+  _showLoginScreen() {
+    let screen = document.getElementById('login-screen');
+    if (!screen) return;
+    screen.classList.remove('hidden');
+
+    // Restore the login form to initial state
+    this._restoreLoginForm();
+
+    // Populate existing users
+    const users = KMSave.listUsers();
+    const usersDiv = screen.querySelector('.login-users');
+    const usersList = screen.querySelector('.login-users-list');
+    if (usersList) usersList.innerHTML = '';
+    if (users.length > 0 && usersDiv && usersList) {
+      usersDiv.classList.remove('hidden');
+      users.forEach(u => {
+        const avatar = KMSave.getUserAvatar(u) || '👾';
+        const btn = document.createElement('button');
+        btn.className = 'login-user-btn';
+        const badge = kmCreditBadge(u);
+        const badgeHtml = badge ? ' <span class="credit-badge">👑 (' + badge + ')</span>' : '';
+        btn.innerHTML = '<span class="login-user-icon">' + avatar + '</span> ' + u + badgeHtml;
+        btn.addEventListener('click', () => this.startLogin(u));
+        usersList.appendChild(btn);
+      });
+    } else if (usersDiv) {
+      usersDiv.classList.add('hidden');
+    }
+  },
+
+  _hideLoginScreen() {
+    const screen = document.getElementById('login-screen');
+    if (screen) screen.classList.add('hidden');
+  },
+};
+
 // Aplicar .locked nos botões ao carregar a página
 document.addEventListener('DOMContentLoaded', async () => {
+  KMAuth.init();
   await KMConfig.checkSaved();
   KM.applyLockedButtons();
 });

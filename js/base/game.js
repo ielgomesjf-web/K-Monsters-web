@@ -56,71 +56,37 @@ KMGames.base = async function() {
   await E.sleep(1500);
   E.print('Ele parece hostil!');
   await E.sleep(1500);
-  E.print('\nPiki se posiciona para lutar!');
+  E.print('\nMãe: "Não se preocupa! Eu te ensino a lutar!"');
+  await E.sleep(2000);
+  E.print('Piki se posiciona para lutar!');
   await E.sleep(1500);
 
   await E.anyKey('Lutar!');
   E.clear();
 
-  // Fight Piki vs K-Bat
+  // Tutorial guiado: Piki vs K-Bat (Mãe ensina passo-a-passo)
   const ganhou = await KMCombat.combateComeco();
 
   let kreatures = S.getBaseKreatures();
   if (!kreatures.includes('Piki')) kreatures.push('Piki');
 
   if (ganhou) {
-    E.print('\nO K-Bat cai no chão, derrotado.');
+    E.print('\nMãe: "Muito bem! Você pegou o jeito!"', 'success');
+    await E.sleep(2000);
+    E.print('O K-Bat cai no chão, derrotado.');
     await E.sleep(2000);
     E.print('Rápido! Você usa o K-Digitalizador!');
     await E.sleep(1500);
     E.print('\n[ K-Bat capturado! ]', 'success');
     if (!kreatures.includes('K-Bat')) kreatures.push('K-Bat');
   } else {
-    E.print('\nPiki foi derrotada...');
+    E.print('\nMãe: "Não se preocupe, você vai melhorar!"');
     await E.sleep(2000);
-    E.print('Mas o K-Bat recua. Você está seguro.');
+    E.print('O K-Bat recua. Você está seguro.');
     await E.sleep(2000);
-    E.print('\nPiki se recupera ao seu lado.');
+    E.print('Piki se recupera ao seu lado.');
   }
   S.setBaseKreatures(kreatures);
-  await E.sleep(2000);
-  await E.anyKey();
-
-  // ============================================================
-  // TUTORIAL
-  // ============================================================
-  E.clear();
-  E.print('═══ TUTORIAL ═══', 'bold');
-  await E.sleep(1000);
-  E.print('\nUm K-Rat aparece no jardim!');
-  await E.sleep(1500);
-  E.print('Mãe: "Use o Piki! Eu te ensino!"');
-  await E.sleep(2000);
-
-  E.print('\n[ ATACAR: causa dano ao inimigo ]');
-  await E.sleep(1000);
-  E.print('[ DEFENDER: ganha bloqueio +3 e bônus +1 ]');
-  await E.sleep(1000);
-  E.print('[ K-SKILL: habilidade especial (1 uso por batalha) ]');
-  await E.sleep(1500);
-
-  E.print('\nVamos praticar!');
-  await E.sleep(1000);
-
-  // Simplified tutorial fight
-  const medalhas = S.getBaseMedalhas();
-  const tutWon = await KMCombat.combateBase('Piki', 'K-Rat', ['Piki'], medalhas);
-
-  if (tutWon) {
-    E.print('\nMãe: "Muito bem! Você pegou o jeito!"', 'success');
-    if (!kreatures.includes('K-Rat')) {
-      kreatures.push('K-Rat');
-      S.setBaseKreatures(kreatures);
-      E.print('[ K-Rat capturado! ]', 'success');
-    }
-  } else {
-    E.print('\nMãe: "Não se preocupe, você vai melhorar!"');
-  }
   await E.sleep(2000);
   await E.anyKey();
 
@@ -515,6 +481,7 @@ KMGames.base = async function() {
     E.print('K-Master: "Você é um DEUS."', 'bold');
     await E.sleep(3000);
 
+    S.set('base_ending', 'secreto');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('    FINAL SECRETO DESBLOQUEADO', 'bold');
     E.print('', 'bold');
@@ -536,6 +503,7 @@ KMGames.base = async function() {
     E.print('K-Master: "Você é uma LENDA."', 'bold');
     await E.sleep(2000);
 
+    S.set('base_ending', 'alternativo');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('  VOCÊ É O K-MASTER LENDÁRIO !!!', 'bold');
     E.print('  Poucos jogadores chegam até aqui.', 'bold');
@@ -551,6 +519,7 @@ KMGames.base = async function() {
     E.print('K-Master: "Você é o novo K-Master !!!"', 'bold');
     await E.sleep(2000);
 
+    S.set('base_ending', 'normal');
     E.print('\n' + '═'.repeat(40), 'bold');
     E.print('   PARABÉNS ! VOCÊ É O NOVO K-MASTER !', 'bold');
     E.print('═'.repeat(40), 'bold');
@@ -589,6 +558,10 @@ KMGames.base = async function() {
   E.print('DEV: Gomes, The Coder - GTC');
   await E.sleep(1000);
   E.print('Tester: Gomes, The Coder - GTC, Fábio Souza Costa');
+  await E.sleep(1000);
+  E.print('Tester: Joãobloxstars, Léo Evaristo');
+  await E.sleep(1000);
+  E.print('Agradecimentos: GugaCoder, BDG - Bruna Dias Gomes, AzuosPy - Lucas Gomes S.');
   await E.sleep(1000);
   E.print('Inspiração: Nintendo - Pokémon');
   await E.sleep(3000);

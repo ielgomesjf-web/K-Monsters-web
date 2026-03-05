@@ -4,7 +4,8 @@
 const KMCombat = {
 
 // ============================================================
-// COMBAT 1 — Começo.py (simplified Piki vs K-Bat)
+// COMBAT 1 — Tutorial guiado (Piki vs K-Bat)
+// Mãe ensina cada ação passo-a-passo
 // ============================================================
 async combateComeco() {
   const E = KMEngine;
@@ -12,70 +13,171 @@ async combateComeco() {
   let bonus = 0, bloqueio = 0;
   let KSKusada = false, KSKKusada = false;
   let bloqueioKBAT = 0, bonusKB = 0, debuff = 0, turnostravado = 0;
+  let turno = 0;
 
-  E.print("O combate começa !");
+  E.print('═══ TUTORIAL ═══', 'bold');
   E.separator();
+  E.print('Mãe: "Calma! Eu te ensino a lutar!"');
+  await E.sleep(2000);
+  E.print(`Vida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
+  await E.sleep(1000);
+
+  // === TURNO 1: Ensina ATACAR ===
+  turno++;
+  E.print('\nMãe: "Primeiro, vamos ATACAR!"', 'bold');
+  await E.sleep(1500);
+  E.print('Mãe: "ATACAR causa dano ao inimigo usando a força do seu Kreature."');
+  await E.sleep(2000);
+  E.print('Mãe: "Aperte ATACAR agora!"');
+  await E.sleep(1000);
+
+  await E.choice([{label: '1 - Atacar', value: '1', primary: true}]);
+
+  E.print("Piki ataca !");
+  let danocausado = 3 + bonus - bloqueioKBAT - debuff;
+  if (danocausado < 0) danocausado = 0;
+  vidaKBAT -= danocausado;
+  E.print(`Incrível! Piki causou ${danocausado} de dano!`, 'success');
+  await E.sleep(2000);
+  bonus = 0; bloqueioKBAT = 0; debuff = 0;
+
+  // K-Bat ataca de volta
+  E.print("O K-Bat ataca de volta!");
+  let danoKB = 3 - 2 + bonusKB - bloqueio;
+  if (danoKB < 0) danoKB = 0;
+  vidaPIKI -= danoKB;
+  E.print(`Piki tomou ${danoKB} de dano!`);
+  bloqueio = 0;
+  await E.sleep(2000);
+
+  E.print(`\nVida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
+  await E.sleep(1000);
+
+  // === TURNO 2: Ensina DEFENDER ===
+  turno++;
+  E.print('\nMãe: "Agora vamos DEFENDER!"', 'bold');
+  await E.sleep(1500);
+  E.print('Mãe: "DEFENDER dá +3 de bloqueio (reduz o dano que você leva)"');
+  await E.sleep(2000);
+  E.print('Mãe: "E também dá +1 de bônus pro seu próximo ataque!"');
+  await E.sleep(2000);
+  E.print('Mãe: "Aperte DEFENDER!"');
+  await E.sleep(1000);
+
+  await E.choice([{label: '2 - Defender', value: '2', primary: true}]);
+
+  E.print("Piki se defende!");
+  bloqueio += 3; bonus += 1;
+  E.print('[ Bloqueio +3 | Bônus +1 ]', 'info');
+  await E.sleep(2000);
+
+  // K-Bat ataca — bloqueio protege
+  E.print("O K-Bat ataca!");
+  danoKB = 3 - 2 + bonusKB - bloqueio;
+  if (danoKB < 0) danoKB = 0;
+  vidaPIKI -= danoKB;
+  if (danoKB === 0) {
+    E.print('O bloqueio absorveu todo o dano!', 'success');
+  } else {
+    E.print(`Piki tomou ${danoKB} de dano!`);
+  }
+  bloqueio = 0;
+  await E.sleep(2000);
+
+  E.print('Mãe: "Viu? O bloqueio protegeu a Piki!"');
+  await E.sleep(2000);
+
+  E.print(`\nVida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
+  await E.sleep(1000);
+
+  // === TURNO 3: Ensina K-SKILL ===
+  turno++;
+  E.print('\nMãe: "Agora o golpe especial: a K-SKILL!"', 'bold');
+  await E.sleep(1500);
+  E.print('Mãe: "Cada Kreature tem uma K-Skill única."');
+  await E.sleep(2000);
+  E.print('Mãe: "A Piki tem a TRAVA DOURADA — prende o inimigo por 1 turno!"');
+  await E.sleep(2000);
+  E.print('Mãe: "Cuidado: você só pode usar 1 vez por batalha!"');
+  await E.sleep(2000);
+  E.print('Mãe: "Use a K-Skill agora!"');
+  await E.sleep(1000);
+
+  await E.choice([{label: '3 - Trava Dourada (1 uso)', value: '3', primary: true}]);
+
+  E.print("Piki usa Trava Dourada!");
+  turnostravado = 1; KSKusada = true;
+  E.print('O K-Bat está preso! Não pode agir neste turno!', 'success');
+  await E.sleep(2000);
+
+  // K-Bat preso — não faz nada
+  E.print("O K-Bat tenta se mexer... mas está preso!");
+  await E.sleep(2000);
+
+  E.print(`\nVida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
+  await E.sleep(1000);
+
+  // === TURNO 4+: Luta livre ===
+  E.print('\nMãe: "Muito bem! Agora termine a luta por conta própria!"', 'bold');
+  await E.sleep(2000);
 
   while (vidaPIKI > 0 && vidaKBAT > 0) {
-    E.print(`Vida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
+    turno++;
+    E.print(`\nVida Piki: ${vidaPIKI} | Vida K-Bat: ${vidaKBAT}`);
 
     const opts = [
       {label: '1 - Atacar', value: '1'},
       {label: '2 - Defender', value: '2'},
     ];
-    if (!KSKusada) opts.push({label: '3 - Trava Dourada (1 uso)', value: '3'});
     const escolha = await E.choice(opts);
 
     if (escolha === '1') {
-      E.print("Piki ataca !");
-      let dano = 3;
-      let danocausado = dano + bonus - bloqueioKBAT - debuff;
+      E.print("Piki ataca!");
+      danocausado = 3 + bonus - bloqueioKBAT - debuff;
       if (danocausado < 0) danocausado = 0;
       vidaKBAT -= danocausado;
-      E.print(`incrível ! Piki causou ${danocausado} de dano !`);
-      await E.sleep(2000);
+      E.print(`Piki causou ${danocausado} de dano!`);
+      await E.sleep(1500);
       bonus = 0; bloqueioKBAT = 0; debuff = 0;
       turnostravado -= 1;
     } else if (escolha === '2') {
-      E.print("Piki defende !");
+      E.print("Piki se defende!");
       bloqueio += 3; bonus += 1;
+      E.print('[ Bloqueio +3 | Bônus +1 ]', 'info');
       turnostravado -= 1;
-    } else if (escolha === '3' && !KSKusada) {
-      E.print("Piki usa Trava Dourada !");
-      turnostravado = 1; KSKusada = true;
     }
 
     if (vidaKBAT <= 0) break;
 
     // Turno do K-Bat
-    const ataqueKB = Math.floor(Math.random() * 3) + 1;
-    if (ataqueKB === 1) {
-      if (turnostravado <= 0) {
-        E.print("O K-Bat ataca !");
-        let danoKB = 3 - 2 + bonusKB - bloqueio;
+    const ataqueKBat = Math.floor(Math.random() * 3) + 1;
+    if (ataqueKBat === 1) {
+      if (turnostravado > 0) {
+        E.print("O K-Bat ainda está preso!");
+        turnostravado -= 1;
+      } else {
+        E.print("O K-Bat ataca!");
+        danoKB = 3 - 2 + bonusKB - bloqueio;
         if (danoKB < 0) danoKB = 0;
         vidaPIKI -= danoKB;
-        E.print(`Piki tomou ${danoKB} !`);
+        E.print(`Piki tomou ${danoKB}!`);
         bloqueio = 0;
-      } else {
-        E.print("O K-Bat fica mais preso ainda !");
-        turnostravado += 1;
       }
-    } else if (ataqueKB === 3 && !KSKKusada) {
-      E.print("Oh não ! K-Bat usou Empurrão de vento !");
+    } else if (ataqueKBat === 3 && !KSKKusada) {
+      E.print("Oh não! K-Bat usou Empurrão de Vento!");
       debuff = 3; KSKKusada = true;
     } else {
-      E.print("K-Bat se protege !");
+      E.print("K-Bat se protege!");
       bloqueioKBAT += 1; bonusKB += 1;
     }
     await E.sleep(1000);
   }
 
   if (vidaKBAT <= 0) {
-    E.print("Piki venceu o K-Bat !");
+    E.print("\nPiki venceu o K-Bat!", 'success');
     return true;
   } else {
-    E.print("Piki foi derrotada...");
+    E.print("\nPiki foi derrotada...");
     return false;
   }
 },

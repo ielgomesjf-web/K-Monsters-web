@@ -8,8 +8,25 @@
 </head>
 <body class="game-page">
 
+<!-- Login Screen -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<h2>K-MONSTERS</h2>
+<p class="login-sub">Digite seu nome para entrar</p>
+<div id="login-form">
+<input type="text" id="login-input" placeholder="Seu nome..." maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter')KMAuth.startLogin(this.value)">
+<button class="login-btn" id="login-btn" onclick="KMAuth.startLogin(document.getElementById('login-input').value)">CONTINUAR</button>
+</div>
+<div class="login-users hidden">
+<div class="login-users-title">JOGADORES EXISTENTES</div>
+<div class="login-users-list"></div>
+</div>
+</div>
+</div>
+
 <div class="game-header">
 <h1>K-MONSTERS</h1>
+<div class="user-display" id="user-display"></div>
 <button class="mobile-menu-btn" onclick="document.getElementById('game-menu').classList.toggle('open')">☰</button>
 <a href="index.html" class="back-link">← Voltar ao site</a>
 </div>
@@ -46,7 +63,16 @@ Pacote Completo
 <button class="menu-btn key-btn" onclick="KM.activateKey()">Ativar Chave
 <span class="menu-sub">Inserir chave de 25 dígitos</span>
 </button>
+<button class="menu-btn" onclick="KMProfile.show()">Perfil
+<span class="menu-sub">Seus stats e conquistas</span>
+</button>
+<button class="menu-btn" onclick="KMHall.show()">Jogadores
+<span class="menu-sub">Hall de jogadores locais</span>
+</button>
 <button class="menu-btn" onclick="KM.resetSave()">Resetar Save</button>
+<button class="menu-btn" onclick="KMAuth.logout()">Trocar Conta
+<span class="menu-sub">Entrar com outro jogador</span>
+</button>
 </nav>
 
 <div class="game-main" style="position:relative">
